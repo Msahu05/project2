@@ -29,7 +29,8 @@ app.secret_key = 'your_secret_key' # Make sure to change this to a strong, rando
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 print(f"DEBUG: SQLALCHEMY_DATABASE_URI is: {app.config['SQLALCHEMY_DATABASE_URI']}") # ADD THIS LINE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Good practice for SQLAlchemy
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
 # Define User model for SQLAlchemy (This is how you interact with your 'users' table)
 class User(db.Model):
@@ -48,7 +49,7 @@ class User(db.Model):
 # Since you have shopping_app.sql, you'll import that to Render's Postgres.
 # So, you don't need to run this on every app start, but it's here for context.
 # with app.app_context():
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
 with app.app_context(): # ADD THIS LINE
     db.create_all()  
 

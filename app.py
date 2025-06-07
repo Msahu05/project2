@@ -48,7 +48,9 @@ class User(db.Model):
 # Since you have shopping_app.sql, you'll import that to Render's Postgres.
 # So, you don't need to run this on every app start, but it's here for context.
 # with app.app_context():
-#     db.create_all()
+db = SQLAlchemy(app)
+with app.app_context(): # ADD THIS LINE
+    db.create_all()  
 
 
 @app.after_request

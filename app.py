@@ -1,5 +1,6 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy # Changed: Imported SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 import random
@@ -11,20 +12,42 @@ app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'devraj.patel247@gmail.com'  # Your Gmail address
-app.config['MAIL_PASSWORD'] = 'kyyi dcvz ofvr bjbz'     # Your App Password here
+app.config['MAIL_USERNAME'] = 'devraj.patel247@gmail.com' # Your Gmail address
+app.config['MAIL_PASSWORD'] = 'kyyi dcvz ofvr bjbz' # Your App Password here
 
 mail = Mail(app)
 
 app.secret_key = 'your_secret_key' # Make sure to change this to a strong, random key in production!
 
-# MySQL Config
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Mohit@0007'
-app.config['MYSQL_DB'] = 'shopping_app'
+# Removed MySQL Config specific to Flask_MySQLdb
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_PASSWORD'] = 'Mohit@0007'
+# app.config['MYSQL_DB'] = 'shopping_app'
 
-mysql = MySQL(app)
+# SQLAlchemy (PostgreSQL) Config
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Good practice for SQLAlchemy
+db = SQLAlchemy(app)
+
+# Define User model for SQLAlchemy (This is how you interact with your 'users' table)
+class User(db.Model):
+    __tablename__ = 'users' # Ensure this matches your table name in shopping_app.sql
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False) # Store hashed password
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
+# IMPORTANT: You need to create the table if it doesn't exist.
+# For initial deployment on Render, the 'db.create_all()' will typically run if the table doesn't exist,
+# but usually, you'd run this locally once, or use migrations.
+# Since you have shopping_app.sql, you'll import that to Render's Postgres.
+# So, you don't need to run this on every app start, but it's here for context.
+# with app.app_context():
+#     db.create_all()
 
 
 @app.after_request
@@ -302,21 +325,21 @@ ALL_PRODUCTS = [
 @app.route('/', methods=['GET', 'POST'])
 def index():
     message = ''
-    flip = False  # False = Login, True = Register
+    flip = False # False = Login, True = Register
 
     if request.method == 'POST':
         if 'login_submit' in request.form:
             username = request.form['login_username']
             password = request.form['login_password']
-            cur = mysql.connection.cursor()
-            cur.execute("SELECT password FROM users WHERE username=%s", (username,))
-            user = cur.fetchone()
-            cur.close()
+            
+            # --- SQLAlchemy Change ---
+            user = User.query.filter_by(username=username).first()
+            # --- End SQLAlchemy Change ---
 
-            if user and check_password_hash(user[0], password):
+            if user and check_password_hash(user.password, password): # Changed: user.password
                 session['username'] = username
                 flash('Logged in successfully!')
-                return redirect(url_for('products')) # CHANGED from 'main' to 'products'
+                return redirect(url_for('products'))
             else:
                 message = "Invalid username or password."
                 flip = False
@@ -331,26 +354,27 @@ def index():
             if password != confirm_password:
                 message = "Passwords don't match."
             else:
-                cur = mysql.connection.cursor()
-                cur.execute("SELECT * FROM users WHERE username=%s OR email=%s", (username, email))
-                existing_user = cur.fetchone()
-                if existing_user:
+                # --- SQLAlchemy Change ---
+                existing_user_username = User.query.filter_by(username=username).first()
+                existing_user_email = User.query.filter_by(email=email).first()
+                # --- End SQLAlchemy Change ---
+
+                if existing_user_username or existing_user_email:
                     message = "Username or email already exists."
                 else:
                     hashed_password = generate_password_hash(password)
-                    cur.execute(
-                        "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-                        (username, email, hashed_password)
-                    )
-                    mysql.connection.commit()
-                    cur.close()
+                    # --- SQLAlchemy Change ---
+                    new_user = User(username=username, email=email, password=hashed_password)
+                    db.session.add(new_user)
+                    db.session.commit()
+                    # --- End SQLAlchemy Change ---
+
                     flash('Registration successful! Please log in.')
                     return redirect(url_for('index'))
-                cur.close()
 
     return render_template('index.html', message=message, flip=flip, username=session.get('username'))
 
-@app.route('/products') # Correct: This is your products page
+@app.route('/products')
 def products():
     if 'username' not in session:
         flash('Please log in first.')
@@ -411,7 +435,7 @@ def add_to_cart(product_id):
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session['cart'] = cart
     flash('Item added to cart!')
-    return redirect(url_for('products')) # CHANGED from 'main' to 'products'
+    return redirect(url_for('products'))
 
 @app.route('/remove_from_cart/<int:product_id>', methods=['POST'])
 def remove_from_cart(product_id):
@@ -437,20 +461,19 @@ def checkout():
 
     username = session['username']
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT email FROM users WHERE username=%s", (username,))
-    user_data = cur.fetchone()
-    cur.close()
+    # --- SQLAlchemy Change ---
+    user_data = User.query.filter_by(username=username).first()
+    # --- End SQLAlchemy Change ---
 
     if not user_data:
         flash('User email not found.')
         return redirect(url_for('cart'))
 
-    user_email = user_data[0]
+    user_email = user_data.email # Changed: Access email via .email on the User object
     cart = session.get('cart', {})
     if not cart:
         flash('Your cart is empty.')
-        return redirect(url_for('products')) # CHANGED from 'main' to 'products'
+        return redirect(url_for('products'))
 
     all_products = ALL_PRODUCTS
 
@@ -486,7 +509,7 @@ def checkout():
             flash(f"Payment processed but email failed: {str(e)}")
 
         session['cart'] = {} # Clear cart after successful checkout/email attempt
-        return redirect(url_for('products')) # CHANGED from 'main' to 'products'
+        return redirect(url_for('products'))
 
     return render_template('checkout.html', cart_items=cart_items, total_price=total_price)
 
@@ -545,7 +568,7 @@ def complete_mock_payment():
 # The single, correct /paypal-payment-complete route
 @app.route('/paypal-payment-complete', methods=['POST'])
 def paypal_payment_complete():
-    data = request.get_json(force=True)  # force=True to ensure JSON parsing
+    data = request.get_json(force=True) # force=True to ensure JSON parsing
     print("Payment success:", data)
 
     # Clear cart safely

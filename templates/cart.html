@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Cart - HoomanMart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #6a0dad;
+            /* Deep Purple */
+            --secondary-color: #8a2be2;
+            /* Blue Violet */
+            --accent-color: #00bcd4;
+            /* Cyan */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --background-dark: #1a1a2e;
+            --card-background: rgba(45, 45, 70, 0.9);
+            --border-radius-soft: 8px;
+            --transition-speed: 0.3s ease-in-out;
+            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --box-shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.3);
+            --error-color: #ff4d4d; /* For remove buttons */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--background-dark), #0f0f20);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation Bar (Re-used from main page) --- */
+        .navigation {
+            background: var(--background-dark);
+            backdrop-filter: blur(10px);
+            color: white;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            box-shadow: var(--box-shadow-medium);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navigation img {
+            max-height: 50px;
+            transition: transform var(--transition-speed);
+        }
+
+        .navigation img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            transition: color var(--transition-speed);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            left: 50%;
+            bottom: -5px;
+            transform: translateX(-50%);
+            transition: width var(--transition-speed);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- Main Content Styling for Cart --- */
+        main {
+            max-width: 800px;
+            margin: 50px auto;
+            background: var(--card-background);
+            border-radius: var(--border-radius-soft);
+            box-shadow: var(--box-shadow-medium);
+            padding: 30px 40px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2.2em;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 30px;
+        }
+
+        ul li {
+            background: rgba(60, 60, 90, 0.7);
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            border-radius: var(--border-radius-soft);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--text-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        ul li:hover {
+            transform: translateY(-3px);
+            background: rgba(80, 80, 110, 0.8);
+        }
+
+        .item-info {
+            flex-grow: 1;
+            font-size: 1.1em;
+            color: var(--text-light);
+            margin-right: 15px; /* Space from buttons */
+        }
+
+        .item-info strong {
+            color: var(--accent-color); /* Highlight item name/price */
+        }
+
+        .quantity-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto; /* Push to the right */
+            margin-top: 5px; /* Adjust for wrap on small screens */
+        }
+        @media (min-width: 500px) { /* Reset margin for larger screens */
+            .quantity-form {
+                margin-top: 0;
+            }
+        }
+
+
+        input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid var(--secondary-color);
+            border-radius: var(--border-radius-soft);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 1em;
+            text-align: center;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px rgba(0, 188, 212, 0.5);
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            border-radius: 50px; /* Pill shape */
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: background-color var(--transition-speed), transform 0.2s ease, box-shadow var(--transition-speed);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 5px; /* Space between buttons */
+        }
+
+        .action-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .action-button.remove {
+            background-color: var(--error-color);
+        }
+
+        .action-button.remove:hover {
+            background-color: #d63030;
+        }
+
+        .total {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-align: right;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(138, 43, 226, 0.3);
+            text-shadow: 0 0 8px rgba(0, 188, 212, 0.2);
+        }
+
+        a.checkout-link {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background-color: var(--primary-color);
+            padding: 18px 0;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-top: 40px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transition: background-color var(--transition-speed), transform 0.2s ease, box-shadow var(--transition-speed);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        a.checkout-link:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        a.checkout-link.disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        a.checkout-link.disabled:hover {
+             background-color: #666; /* Keep same on hover */
+        }
+
+
+        footer {
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 50px;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(106, 13, 173, 0.3);
+        }
+        .cart-item {
+        display: flex;
+        flex-direction: column; /* Stack items vertically on mobile by default */
+        align-items: flex-start; /* Align content to the start */
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid var(--accent-color);
+        border-radius: var(--border-radius-soft);
+        background-color: var(--card-background);
+        box-shadow: var(--box-shadow-light);
+    }
+
+    .cart-item-info {
+        display: flex;
+        flex-direction: column; /* Stack product name and price */
+        margin-bottom: 10px; /* Space between info and actions */
+    }
+
+    .cart-item-actions {
+        display: flex; /* Use flexbox for the action buttons */
+        flex-wrap: wrap; /* Allow wrapping if space is really tight */
+        align-items: center; /* Vertically align items */
+        gap: 10px; /* Space between elements */
+        width: 100%; /* Take full width within the cart item */
+    }
+
+    .cart-item-actions form {
+        display: flex;
+        align-items: center;
+        gap: 5px; /* Space between input and button */
+    }
+
+    .cart-item-actions input[type="number"] {
+        width: 60px; /* Adjust width for mobile */
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid var(--text-light);
+        background-color: var(--background-dark);
+        color: var(--text-light);
+    }
+
+    .cart-item-actions .action-button,
+    .cart-item-actions .remove-button {
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 0.9em; /* Slightly smaller font for buttons */
+        white-space: nowrap; /* Prevent button text from wrapping */
+    }
+
+
+    /* Media Query for larger screens (e.g., desktop view) */
+    @media (min-width: 769px) {
+        .cart-item {
+            flex-direction: row; /* Layout horizontally on larger screens */
+            justify-content: space-between; /* Space out items */
+            align-items: center; /* Center items vertically */
+        }
+
+        .cart-item-info {
+            flex-direction: row; /* Keep product name and price in a row */
+            align-items: center;
+            flex-grow: 1; /* Allow info to take available space */
+            margin-bottom: 0; /* Remove bottom margin */
+        }
+
+        .cart-item-name {
+            margin-right: 15px; /* Space between name and price */
+        }
+
+        .cart-item-actions {
+            justify-content: flex-end; /* Push actions to the right */
+            width: auto; /* Revert width */
+        }
+    }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav class="navigation">
+            <a href="{{ url_for('products') }}"> <img src="{{ url_for('static', filename='Hoomanmart.png') }}" alt="HoomanMart Logo" />
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('products') }}">Home</a> <a href="{{ url_for('products') }}">Products</a> <a href="javascript:void(0);" onclick="toggleAbout()">About</a>
+                <a href="https://wa.me/+919687637410" target="_blank">Contact</a>
+                   <form action="{{ url_for('logout') }}" method="GET" style="padding: 2px;">
+                     <button type="submit" class="action-button">Logout</button>
+                 </form>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Your Shopping Cart</h1>
+
+        {% if cart_items|length == 0 %}
+        <p style="text-align: center; font-size: 1.1em; color: var(--text-light); margin-bottom: 30px;">
+            Your cart is feeling a bit empty. Time to find some amazing hoomans!
+        </p>
+        <a href="{{ url_for('products') }}" class="checkout-link disabled">Continue Shopping</a> {% else %}
+        <ul>
+            {% for item in cart_items %}
+            <li>
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-name">{{ item.name }}</span>
+                        <span class="cart-item-price">Price: ₹{{ item.price }}</span>
+                    </div>
+                    <div class="cart-item-actions">
+                        <form action="{{ url_for('update_quantity', product_id=item.id) }}" method="POST">
+                            <label for="quantity-{{ item.id }}">Quantity:</label>
+                            <input type="number" id="quantity-{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="0" />
+                            <button type="submit" class="action-button">Update</button>
+                        </form>
+                        <form action="{{ url_for('remove_from_cart', product_id=item.id) }}" method="POST">
+                            <button type="submit" class="remove-button">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="total">
+            Grand Total: INR ₹{{ "%.2f"|format(total_price) }}
+        </div>
+
+        <a href="{{ url_for('checkout') }}" class="checkout-link">Proceed to Checkout →</a>
+        {% endif %}
+    </main>
+
+    <footer>
+        &copy; 2025 HoomanMart. All rights reserved.
+        <div class="footer-contacts" style="margin-top: 15px;">
+            <p><strong>Address:</strong> R. C. Technical Institute</p>
+            <p><strong>Phone:</strong> +91 9687637410, +91 9726323142</p>
+            <p><strong>Devs:</strong> Mohit Sahu, Devraj Patel</p>
+            <p><strong>Email:</strong> <a href="mailto:info@hoomanmart.com" style="color: var(--accent-color); text-decoration: none;">info@hoomanmart.com</a></p>
+            <div class="social-links" style="margin-top: 10px;">
+                <a href="https://facebook.com" target="_blank" style="color: var(--accent-color); text-decoration: none; margin: 0 5px;">Facebook</a> |
+                <a href="https://twitter.com/mohit744425459" target="_blank" style="color: var(--accent-color); text-decoration: none; margin: 0 5px;">Twitter</a> |
+                <a href="https://wa.me/+919687637410" target="_blank" style="color: var(--accent-color); text-decoration: none; margin: 0 5px;">Whatsapp</a> |
+                <a href="https://instagram.com/simpmohh" target="_blank" style="color: var(--accent-color); text-decoration: none; margin: 0 5px;">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleAbout() {
+            alert("This feature is under development!"); // Or link to an actual about page
+        }
+    </script>
+
+</body>
+
+</html>

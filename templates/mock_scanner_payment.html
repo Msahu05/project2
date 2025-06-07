@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - HoomanMart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6a0dad; /* Deep Purple */
+            --secondary-color: #8a2be2; /* Blue Violet */
+            --accent-color: #00bcd4; /* Cyan */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --background-dark: #1a1a2e;
+            --card-background: rgba(45, 45, 70, 0.9);
+            --border-radius-soft: 8px;
+            --transition-speed: 0.3s ease-in-out;
+            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --box-shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--primary-color);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: var(--box-shadow-medium);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-light);
+            margin: 0;
+            font-size: 2em;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px 20px; /* Adjust padding to account for fixed header */
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+
+        .payment-container {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius-soft);
+            box-shadow: var(--box-shadow-medium);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            margin-top: 20px; /* Space from header */
+        }
+
+        .payment-container h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .payment-container p {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+
+        .scanner-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 25px;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius-soft);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-group input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid var(--secondary-color);
+            border-radius: var(--border-radius-soft);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.3);
+        }
+
+        .action-button {
+            background-color: var(--accent-color);
+            color: var(--background-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius-soft);
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-button:hover:not(.disabled) {
+            background-color: #00acc1; /* Slightly darker cyan */
+            transform: translateY(-2px);
+        }
+
+        .action-button.disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .flashes li {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius-soft);
+            font-weight: 600;
+            color: var(--text-dark); /* Default for flashes */
+        }
+
+        .flashes li.success {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .flashes li.error {
+            background-color: #f44336; /* Red */
+        }
+
+        .flashes li.message { /* For general messages */
+            background-color: #2196F3; /* Blue */
+        }
+
+        footer {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            text-align: center;
+            padding: 15px 0;
+            margin-top: auto; /* Pushes footer to the bottom */
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+        }
+        .footer-contacts p,
+        .footer-contacts a {
+            color: var(--text-light);
+            /* Ensure footer text is visible */
+            text-decoration: none;
+        }
+
+        .footer-contacts a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HoomanMart</h1>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="payment-container">
+            <h2>Complete Your Payment</h2>
+            <p>Please scan the QR code and enter the 12-digit UTR (Unique Transaction Reference) number below.</p>
+            <p style="font-weight: bold; color: var(--accent-color);">Amount to Pay: INR ₹{{ "%.2f"|format(total_price) }}</p>
+
+            <img src="{{ url_for('static', filename='scanner_qr.png') }}" alt="Scanner QR Code" class="scanner-image">
+            <p style="font-size: 0.9em; color: rgba(255, 255, 255, 0.7);">
+            </p>
+
+            <form action="{{ url_for('complete_mock_payment') }}" method="POST">
+                <div class="form-group">
+                    <label for="utr">Enter 12-Digit UTR:</label>
+                    <input type="text" id="utr" name="utr" placeholder="e.g., 123456789012" maxlength="12" pattern="\d{12}" required>
+                    <input type="hidden" name="total_price" value="{{ '%.2f'|format(total_price) }}">
+                </div>
+                <button type="submit" id="submitUtrButton" class="action-button disabled" disabled>Submit UTR & Complete Payment</button>
+            </form>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <a href="{{ url_for('checkout') }}" class="action-button">Back to Checkout</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 HoomanMart. All rights reserved.
+        <div class="footer-contacts">
+            <p><strong>Address:</strong> R. C. Technical Institute</p>
+            <p><strong>Phone:</strong> +91 9687637410, +91 9726323142</p>
+            <p><strong>Devs:</strong> Mohit Sahu, Devraj Patel</p>
+            <p><strong>Email:</strong> <a href="mailto:info@hoomanmart.com">info@hoomanmart.com</a></p>
+            <div class="social-links">
+                <a href="https://facebook.com" target="_blank">Facebook</a> |
+                <a href="https://twitter.com/mohit744425459" target="_blank">Twitter</a> |
+                <a href="https://wa.me/+919687637410" target="_blank">Whatsapp</a> |
+                <a href="https://instagram.com/simpmohh" target="_blank">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const utrInput = document.getElementById('utr');
+        const submitButton = document.getElementById('submitUtrButton');
+
+        utrInput.addEventListener('input', function() {
+            // Enable button only if input is exactly 12 digits and contains only numbers
+            if (this.value.length === 12 && /^\d+$/.test(this.value)) {
+                submitButton.classList.remove('disabled');
+                submitButton.disabled = false;
+            } else {
+                submitButton.classList.add('disabled');
+                submitButton.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flip Login/Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: -1;
+    }
+
+    .container {
+      perspective: 1000px;
+      width: 350px;
+      height: 460px;
+    }
+
+    .flip-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+    }
+
+    .flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      color: white;
+      animation: fadeInUp 1s ease-out;
+    }
+
+
+    .flip-card-back {
+      /* Blue */
+      transform: rotateY(180deg);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 700;
+      font-size: 2em;
+    }
+
+    #r {
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px #00ffe7;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: black;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1em;
+    }
+
+    button+button {
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: #111;
+      border-radius: 20px;
+    }
+
+    .forgot-password {
+      margin-top: 20px;
+      color: #00ffe7;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9em;
+      user-select: none;
+      align-self: center;
+      display: block;
+    }
+
+    .forgot-password:hover {
+      color: #ffffff;
+      margin-left: 0;
+      text-decoration: underline;
+    }
+
+    .text {
+      font-size: 0.9em;
+      margin: 15px 0 10px 0;
+      color: #fff;
+      user-select: none;
+      align-self: center;
+    }
+
+    .flip-card-face form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .links a {
+      color: #00ffe7;
+      text-decoration: none;
+      display: block;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .regis {
+      color: #ffffff;
+      text-align: center;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="flip-card" id="flipCard" data-flip="{{ 'true' if flip else 'false' }}">
+
+      <div class="flip-card-face flip-card-front">
+        <h2>Login</h2>
+        {% if message and not flip %}
+        <p style="color:yellow">{{ message }}</p>
+        {% endif %}
+        <form method="POST" autocomplete="off">
+          <input type="text" name="login_username" placeholder="Username" required />
+          <input type="password" name="login_password" placeholder="Password" required />
+          <button type="submit" name="login_submit">Login</button>
+        </form>
+        <div class="links">
+          <a onclick="alert('Password recovery coming soon!')">Forgot password?</a>
+        </div>
+        <br>
+        <div class="regis">
+          <a onclick="flipCard()">No account? Register Here..</a>
+        </div>
+      </div>
+
+      <div class="flip-card-face flip-card-back">
+        <h2 id="r">Register</h2>
+        {% if message and flip %}
+        <p style="color:yellow">{{ message }}</p>
+        {% endif %}
+        <form method="POST" autocomplete="off">
+          <input type="text" name="register_username" placeholder="Username" required />
+          <input type="email" name="register_email" placeholder="Email" required />
+          <input type="password" name="register_password" placeholder="Password" required />
+          <input type="password" name="register_confirm_password" placeholder="Confirm Password" required />
+          <button type="submit" name="register_submit">Register</button>
+        </form>
+        <div class="regis">
+          <a onclick="flipCard()">Already have an account? Login</a>
+          <br>
+        </div>
+        <br>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js"></script>
+  <script>
+    function flipCard() {
+      document.getElementById('flipCard').classList.toggle('flipped');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const flipCardDiv = document.getElementById('flipCard');
+      if (flipCardDiv.dataset.flip === 'true') {
+        flipCardDiv.classList.add('flipped');
+      } else {
+        flipCardDiv.classList.remove('flipped');
+      }
+    });
+
+    VanillaTilt.init(document.querySelector(".container"), {
+      max: 15,
+      speed: 400,
+      glare: true,
+      "max-glare": 0.2
+    });
+  </script>
+
+
+</body>
+
+</html>

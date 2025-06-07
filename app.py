@@ -26,7 +26,8 @@ app.secret_key = 'your_secret_key' # Make sure to change this to a strong, rando
 # app.config['MYSQL_DB'] = 'shopping_app'
 
 # SQLAlchemy (PostgreSQL) Config
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+print(f"DEBUG: SQLALCHEMY_DATABASE_URI is: {app.config['SQLALCHEMY_DATABASE_URI']}") # ADD THIS LINE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Good practice for SQLAlchemy
 db = SQLAlchemy(app)
 
